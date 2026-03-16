@@ -1,6 +1,8 @@
 package com.yael.inventario.service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.yael.inventario.dao.ProductoDao;
@@ -61,8 +63,9 @@ public class ProductoService implements IProductoService{
 	 */
 	@Override
 	public List<Producto> productosSinStock() {
-		return pd.obtenerProductos().stream().filter(
-				prod -> prod.getCantidad() == 0).collect(Collectors.toList());		
+		return pd.obtenerProductos().stream()
+				.filter(prod -> prod.getCantidad() == 0)
+				.toList();		
 	}
 
 	/*
@@ -72,8 +75,9 @@ public class ProductoService implements IProductoService{
 	 */
 	@Override
 	public List<Producto> obtenerProductosCaros(double precio) {
-		return pd.obtenerProductos().stream().filter(
-				prodPrecio -> prodPrecio.getPrecio() >= precio).collect(Collectors.toList());
+		return pd.obtenerProductos().stream()
+				.filter(prodPrecio -> prodPrecio.getPrecio() >= precio)
+				.toList();
 	}
 	
 	/*
@@ -84,8 +88,36 @@ public class ProductoService implements IProductoService{
 
 	@Override
 	public double valorTotalInventario() {
-		return pd.obtenerProductos().stream().mapToDouble(
-				prod -> prod.getPrecio() * prod.getCantidad()).sum();
+		return pd.obtenerProductos().stream()
+				.mapToDouble(prod -> prod.getPrecio() * prod.getCantidad())
+				.sum();
+	}
+
+	/*
+	 * Funcion que hace una comparacion usando comparator y max para encontrar el maximo valor que se tenga.
+	 */
+	@Override
+	public Producto productoMasCaro() {
+		return pd.obtenerProductos().stream()
+				.max(Comparator.comparing(Producto::getPrecio)).orElse(null);
+	}
+	
+	@Override
+	public double promedioDePrecios() {
+		return pd.obtenerProductos().stream()
+				.mapToDouble(prod -> prod.getPrecio())
+				.average().orElse(0);
+	}
+
+	/*
+	 * Hacemo uso de la estructura de Map, tenedremos dos identificadores True y False 
+	 * Cada uno contrenda una lista dependiendo si tiene o no stock
+	 */
+	@Override
+	public Map<Boolean, List<Producto>> productosConYSinStock() {
+		return pd.obtenerProductos().stream()
+				.collect(Collectors.partitioningBy
+				(productoStock -> productoStock.getCantidad() > 0));
 	}
 	
 	

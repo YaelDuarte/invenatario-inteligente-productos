@@ -1,6 +1,7 @@
 package com.yael.inventario.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.yael.inventario.excepciones.ExcepcionValorCero;
 import com.yael.inventario.excepciones.ExcepcionValorVacio;
@@ -15,4 +16,7 @@ public interface IProductoService {
 	List<Producto> productosSinStock();
 	List<Producto> obtenerProductosCaros(double precio);
 	double valorTotalInventario();
+	Producto productoMasCaro();
+	double promedioDePrecios();
+	Map<Boolean, List<Producto>> productosConYSinStock();
 }

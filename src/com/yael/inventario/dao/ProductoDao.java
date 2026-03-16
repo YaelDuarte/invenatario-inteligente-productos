@@ -26,7 +26,7 @@ public class ProductoDao implements IProductoDAO{
 			ps.executeUpdate();
 			
 		}catch(SQLException e) {
-			
+			e.printStackTrace();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
