@@ -6,15 +6,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.yael.inventario.config.ConexionBD;
+import com.yael.inventario.models.Categoria;
 import com.yael.inventario.models.Producto;
 
 public class ProductoDao implements IProductoDAO{
+	
+	private CategoriaDao categoriaDao;
+	
+	public ProductoDao(CategoriaDao categoriaDao) {
+		this.categoriaDao = categoriaDao;
+	}
 
 	@Override
 	public void guardarProducto(Producto producto) {
-		String sqlQ = "INSERT INTO productos" + " (nombre,precio,cantidad) " + "VALUES (?,?,?)";
+		String sqlQ = "INSERT INTO productos" + " (nombre,precio,cantidad,categoria_id)" + " VALUES (?,?,?,?)";
 		
 		try(Connection conx = ConexionBD.getConnection();
 				PreparedStatement ps = conx.prepareStatement(sqlQ)){
@@ -22,6 +30,7 @@ public class ProductoDao implements IProductoDAO{
 			ps.setString(1, producto.getNombre());
 			ps.setDouble(2, producto.getPrecio());
 			ps.setInt(3, producto.getCantidad());
+			ps.setInt(4, producto.getCategoria().getId());
 			
 			ps.executeUpdate();
 			
@@ -56,16 +65,22 @@ public class ProductoDao implements IProductoDAO{
 		Producto producto = null;
 		
 		try(Connection conx = ConexionBD.getConnection();
-				PreparedStatement ps = conx.prepareStatement(sqlQ)){
+				PreparedStatement ps = conx.prepareStatement(sqlQ);){
 			
-			ResultSet rs = ps.executeQuery();
 			ps.setInt(1, id);
+			ResultSet rs = ps.executeQuery();
 			
 			if(rs.next()) {
-				producto = new Producto(rs.getInt("id"), 
+				int categoriaId = rs.getInt("categoria_id");
+				Optional<Categoria> categoriaOpt = categoriaDao.obtenerCategoria(categoriaId);
+				Categoria categoria = categoriaOpt.orElse(null);
+				
+				producto = new Producto(
+						rs.getInt("id"), 
 						rs.getString("nombre"), 
 						rs.getInt("cantidad"), 
-						rs.getDouble("precio"));
+						rs.getDouble("precio"),
+						categoria);
 			}
 			
 		} catch (SQLException e) {
@@ -83,18 +98,20 @@ public class ProductoDao implements IProductoDAO{
 		String sqlQ = "SELECT * FROM productos";
 		
 		try(Connection conx = ConexionBD.getConnection();
-				PreparedStatement ps = conx.prepareStatement(sqlQ)){
+				PreparedStatement ps = conx.prepareStatement(sqlQ);
+				ResultSet rs = ps.executeQuery()){
 			
-			ResultSet rs = ps.executeQuery();
 			while(rs.next()) {
+				int categoriaId = rs.getInt("categoria_id");
+				Optional<Categoria> categoriaOpt = categoriaDao.obtenerCategoria(categoriaId);
+				Categoria categoria = categoriaOpt.orElse(null);
 				
-				Producto producto = new Producto(
-						rs.getInt("id"),
-						rs.getString("nombre"),
-						rs.getInt("cantidad"),
-						rs.getDouble("precio")
-						);
-				productos.add(producto);
+				productos.add(new Producto(
+						rs.getInt("id"), 
+						rs.getString("nombre"), 
+						rs.getInt("cantidad"), 
+						rs.getDouble("precio"), 
+						categoria));
 			}
 			
 			
@@ -128,5 +145,4 @@ public class ProductoDao implements IProductoDAO{
 		}
 		
 	}
-
 }

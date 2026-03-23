@@ -6,13 +6,16 @@ public class Producto {
 	private String nombre;
 	private int cantidad;
 	private double precio;
+	private Categoria categoria;
 	
-	public Producto(int id,String nombre, int cantidad, double precio) {
+	public Producto(int id,String nombre, int cantidad, double precio,Categoria categoria) {
 		this.id = id;
 		this.nombre = nombre;
 		this.cantidad = cantidad;
 		this.precio = precio;
+		this.categoria = categoria;
 	}
+
 
 	public String getNombre() {
 		return nombre;
@@ -44,6 +47,14 @@ public class Producto {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public Categoria getCategoria() {
+		return categoria;
+	}
+
+	public void setCategoria(Categoria categoria) {
+		this.categoria = categoria;
 	}
 
 	@Override
