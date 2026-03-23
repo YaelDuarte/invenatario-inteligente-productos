@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.yael.inventario.config.ConexionBD;
 import com.yael.inventario.models.Categoria;
@@ -18,6 +17,27 @@ public class ProductoDao implements IProductoDAO{
 	
 	public ProductoDao(CategoriaDao categoriaDao) {
 		this.categoriaDao = categoriaDao;
+	}
+	
+	/*
+	 * Hacemos una funcion privada para la clase, donde obtenermos el id de la 
+	 * categoria, para no repetir logica.
+	 */
+	@SuppressWarnings("unused")
+	private Categoria obtenerCategoriaDeRs(ResultSet rs) {
+		
+		try {
+			int categoriaId = rs.getInt("categoria_id");
+			/*Optional<Categoria> categoriaOpt = categoriaDao.obtenerCategoria(categoriaId);
+			Categoria categoria = categoriaOpt.orElse(null);
+			return categoria;*/
+			return categoriaDao.obtenerCategoria(categoriaId).orElse(null);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		
 	}
 
 	@Override
@@ -71,10 +91,7 @@ public class ProductoDao implements IProductoDAO{
 			ResultSet rs = ps.executeQuery();
 			
 			if(rs.next()) {
-				int categoriaId = rs.getInt("categoria_id");
-				Optional<Categoria> categoriaOpt = categoriaDao.obtenerCategoria(categoriaId);
-				Categoria categoria = categoriaOpt.orElse(null);
-				
+				Categoria categoria = obtenerCategoriaDeRs(rs);
 				producto = new Producto(
 						rs.getInt("id"), 
 						rs.getString("nombre"), 
@@ -102,10 +119,7 @@ public class ProductoDao implements IProductoDAO{
 				ResultSet rs = ps.executeQuery()){
 			
 			while(rs.next()) {
-				int categoriaId = rs.getInt("categoria_id");
-				Optional<Categoria> categoriaOpt = categoriaDao.obtenerCategoria(categoriaId);
-				Categoria categoria = categoriaOpt.orElse(null);
-				
+				Categoria categoria = obtenerCategoriaDeRs(rs);
 				productos.add(new Producto(
 						rs.getInt("id"), 
 						rs.getString("nombre"), 
